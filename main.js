@@ -26,7 +26,7 @@ function templateHTML(title, list, body){
             <a href="/create">Create</a>
             <p>${body}</p>
           </body>
-          </html>
+          </html> 
           `
 }
 
@@ -44,20 +44,6 @@ const app = http.createServer(function (request, response) {
                 response.writeHead(200)
                 response.end(template)
             })
-        }else if(pathname === '/create'){
-            fs.readdir('data/',function(err, data){
-                const title = 'Web - create';
-                const list = templateList(data);
-                const template = templateHTML(title, list, `
-                    <form action="create_process" method="post">
-                     <p><input type="text" name="title" placeholder="title"></p>
-                     <p><textarea name="description" placeholder="description"></textarea></p>
-                     <p><input type="submit"></p>
-                     </form>
-                `)
-            })
-
-
         }
         else {
             fs.readdir('data/', function (err, data){
@@ -69,8 +55,28 @@ const app = http.createServer(function (request, response) {
                     response.end(template)
                 })
             });
+
         }
-    } else {
+
+    }
+    else if(pathname === '/create'){
+        fs.readdir('data/',function(err, data){
+            const title = 'Web - create';
+            const list = templateList(data);
+            const template = templateHTML(title, list, `
+                     <form action="create_process" method="post">
+                     <p><input type="text" name="title" placeholder="title"></p>
+                     <p><textarea name="description" placeholder="description"></textarea></p>
+                     <p><input type="submit"></p>
+                     </form>
+                `)
+            response.writeHead(200)
+            response.end(template)
+        })
+
+
+    }
+    else {
         response.writeHead(404)
         response.end('Not found')
     }
