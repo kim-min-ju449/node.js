@@ -1,6 +1,7 @@
 const http = require('http')
 const fs = require('fs')
 const url = require('url')
+const qs = require('querystring')
 
 function templateList(filelist){
     let list = '<ul>';
@@ -40,6 +41,7 @@ const app = http.createServer(function (request, response) {
             const description = 'Hello, Node.js'
             fs.readdir('data/', function (err, data){
                 const list = templateList(data);
+
                 const template = templateHTML(title, list, description);
                 response.writeHead(200)
                 response.end(template)
@@ -64,7 +66,7 @@ const app = http.createServer(function (request, response) {
             const title = 'Web - create';
             const list = templateList(data);
             const template = templateHTML(title, list, `
-                     <form action="create_process" method="post">
+                     <form action="/create_process" method="post">
                      <p><input type="text" name="title" placeholder="title"></p>
                      <p><textarea name="description" placeholder="description"></textarea></p>
                      <p><input type="submit"></p>
@@ -73,8 +75,21 @@ const app = http.createServer(function (request, response) {
             response.writeHead(200)
             response.end(template)
         })
-
-
+    }
+    else if(pathname ==='/create_process'){
+        let body = '';
+        request.on('data', function(data){
+            body +=body +data;
+        });
+        request.on('end', function(){
+            const post = qs.parse(body);
+            const title = post.title;
+            const description = post.description;
+            fs.writeFile(`data/${title}`, description, 'utf-8', function(err){
+               response.writeHead(302, {Location: `/?id=${title}`});
+               response.end();
+            });
+        })
     }
     else {
         response.writeHead(404)
