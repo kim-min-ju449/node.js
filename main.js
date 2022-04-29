@@ -2,6 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const url = require('url');
 const qs = require('querystring');
+const sanitizeHtml = require('sanitize-html');
 
 const template = {
     List:function (filelist){
@@ -53,10 +54,13 @@ const app = http.createServer(function (request, response) {
                 fs.readdir('data/', function (err, data){
                     fs.readFile(`data/${queryData.id}`, 'utf8', function (err, description){
                     const title = queryData.id
+                        //XSS방지 게시글 제목과 내용에 script를 못넣도록 함
+                    const sanitizeTitle = sanitizeHtml(title);
+                    const sanitizeHtmlDescription = sanitizeHtml(description);
                     const list = template.List(data);
-                    const html = template.HTML(title,list,description,`<a href="create">create</a> <a href="/update?id=${title}">update</a>
+                    const html = template.HTML(title,list,sanitizeHtmlDescription,`<a href="create">create</a> <a href="/update?id=${sanitizeTitle}">update</a>
         <form action="delete_process" method="post">
-            <input type="hidden" name="id" value="${title}">
+            <input type="hidden" name="id" value="${sanitizeTitle}">
             <input type="submit" value="delete">
         </form>`);
                     response.writeHead(200)
